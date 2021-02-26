@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="AttributeHook">
+    <output-path>$PROJECT_DIR$/../../server/[1.12.2]SX2.0.2/plugins</output-path>
+    <root id="archive" name="AttributeHook.jar">
+      <element id="module-output" name="AttributeHook" />
+    </root>
+  </artifact>
+</component>
