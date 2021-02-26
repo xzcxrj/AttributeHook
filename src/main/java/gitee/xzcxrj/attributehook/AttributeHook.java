@@ -21,6 +21,10 @@ public class AttributeHook extends JavaPlugin {
         api.init();
     }
 
+    public static String getVersion() {
+        return version;
+    }
+
     public static final class api {
 
         private static Method getApi;
@@ -127,11 +131,11 @@ public class AttributeHook extends JavaPlugin {
             }
         }
 
-        public static SXAttributeData getProjectileData(UUID uuid) {
+        public static AttributeData getProjectileData(UUID uuid) {
             try {
-                return (SXAttributeData) getProjectileData.invoke(getApi.invoke(null), uuid);
+                return new AttributeData().add(((SXAttributeData) getProjectileData.invoke(getApi.invoke(null), uuid)));
             } catch (IllegalAccessException | InvocationTargetException e) {
-                return new SXAttributeData();
+                return new AttributeData();
             }
         }
 
@@ -167,45 +171,52 @@ public class AttributeHook extends JavaPlugin {
             }
         }
 
-        public static SXAttributeData getEntityAPIData(JavaPlugin plugin, UUID uuid) {
+        public static AttributeData getEntityAPIData(JavaPlugin plugin, UUID uuid) {
+            AttributeData data = new AttributeData();
             try {
-                return (SXAttributeData) getEntityAPIData.invoke(getApi.invoke(null), plugin.getClass(), uuid);
+                return data.add((SXAttributeData) getEntityAPIData.invoke(getApi.invoke(null), plugin.getClass(), uuid));
             } catch (IllegalAccessException | InvocationTargetException e) {
-                return new SXAttributeData();
+                return data;
             }
         }
 
-        public static SXAttributeData getEntityData(LivingEntity livingEntity) {
+        public static AttributeData getEntityData(LivingEntity livingEntity) {
+            AttributeData data = new AttributeData();
             try {
                 if (version.contains("2.0.2")) {
-                    return (SXAttributeData) getEntityData.invoke(getApi.invoke(null), livingEntity, new SXAttributeData(){});
+                    data.add((SXAttributeData) getEntityData.invoke(getApi.invoke(null), livingEntity, new SXAttributeData(){}));
+                }else {
+                    data.add((SXAttributeData) getEntityData.invoke(getApi.invoke(null), livingEntity));
                 }
-                return (SXAttributeData) getEntityData.invoke(getApi.invoke(null), livingEntity);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                return new SXAttributeData();
+            } catch (IllegalAccessException | InvocationTargetException ignored) {
             }
+            return data;
         }
 
-        public static SXAttributeData loadListData(List<String> list) {
+        public static AttributeData loadListData(List<String> list) {
+            AttributeData data = new AttributeData();
             try {
                 if (version.contains("2.0.2")) {
-                    return (SXAttributeData) loadListData.invoke(getApi.invoke(null), null, null, list);
+                    data.add((SXAttributeData) loadListData.invoke(getApi.invoke(null), null, null, list));
+                }else {
+                    data.add((SXAttributeData) loadListData.invoke(getApi.invoke(null), list));
                 }
-                return (SXAttributeData) loadListData.invoke(getApi.invoke(null), list);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                return new SXAttributeData();
+            } catch (IllegalAccessException | InvocationTargetException ignored) {
             }
+            return data;
         }
 
-        public static SXAttributeData loadItemData(LivingEntity entity, ItemStack... itemStacks) {
+        public static AttributeData loadItemData(LivingEntity entity, ItemStack... itemStacks) {
+            AttributeData data = new AttributeData();
             try {
                 if (version.contains("2.0.2")) {
-                    return (SXAttributeData) loadItemData.invoke(getApi.invoke(null), entity, null, itemStacks);
+                    data.add((SXAttributeData) loadItemData.invoke(getApi.invoke(null), entity, null, itemStacks));
+                }else {
+                    data.add((SXAttributeData) loadItemData.invoke(getApi.invoke(null), entity, itemStacks));
                 }
-                return (SXAttributeData) loadItemData.invoke(getApi.invoke(null), entity, itemStacks);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                return new SXAttributeData();
+            } catch (IllegalAccessException | InvocationTargetException ignored) {
             }
+            return data;
         }
     }
 }
