@@ -4,6 +4,7 @@ import github.saukiya.sxattribute.data.attribute.AttributeMap;
 import github.saukiya.sxattribute.data.attribute.SXAttributeData;
 import github.saukiya.sxattribute.data.attribute.SubAttribute;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -241,11 +242,17 @@ public class AttributeHook extends JavaPlugin {
 
         public static AttributeData loadItemData(LivingEntity entity, ItemStack... itemStacks) {
             AttributeData data = new AttributeData();
+            ItemStack[] items;
+            if (itemStacks.length < 1) {
+                items = new ItemStack[] {new ItemStack(Material.AIR)};
+            }else {
+                items = itemStacks;
+            }
             try {
                 if (version.contains("2.0.2")) {
-                    data.add((SXAttributeData) loadItemData.invoke(getApi.invoke(null), entity, null, itemStacks));
+                    data.add((SXAttributeData) loadItemData.invoke(getApi.invoke(null), entity, null, items));
                 }else {
-                    data.add((SXAttributeData) loadItemData.invoke(getApi.invoke(null), entity, itemStacks));
+                    data.add((SXAttributeData) loadItemData.invoke(getApi.invoke(null), entity, items));
                 }
             } catch (IllegalAccessException | InvocationTargetException ignored) {
             }
