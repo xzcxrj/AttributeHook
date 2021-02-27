@@ -1,11 +1,17 @@
 package gitee.xzcxrj.attributehook;
 
+import gitee.xzcxrj.attributehook.api.event.ReloadEvent;
 import github.saukiya.sxattribute.data.attribute.AttributeMap;
 import github.saukiya.sxattribute.data.attribute.SXAttributeData;
 import github.saukiya.sxattribute.data.attribute.SubAttribute;
+import github.saukiya.sxattribute.event.SXReloadEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-public class AttributeHook extends JavaPlugin {
+public class AttributeHook extends JavaPlugin implements Listener {
 
     private static String version;
 
@@ -22,8 +28,13 @@ public class AttributeHook extends JavaPlugin {
     public void onEnable() {
         version = BukkitLoader.getVersion("SX-Attribute");
         api.init();
+        Bukkit.getPluginManager().registerEvents(this, this);
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    private void on(SXReloadEvent event) {
+        Bukkit.getPluginManager().callEvent(new ReloadEvent(event));
+    }
 
     public static String getSXAttributeVersion() {
         return version;
