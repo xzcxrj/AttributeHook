@@ -25,7 +25,7 @@ public class AttributeData extends SXAttributeData {
         }
     }
 
-    private static SubAttribute getAttribute(String s, SXAttributeData data) {
+    private static SubAttribute getAttribute(String s, AttributeData data) {
         try {
             return (SubAttribute) getSubAttribute.invoke(data, s);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -42,8 +42,21 @@ public class AttributeData extends SXAttributeData {
     }
 
 
-    public AttributeData add(SXAttributeData attributeData) {
+    public AttributeData add(AttributeData attributeData) {
         super.add(attributeData);
+        return this;
+    }
+
+    public AttributeData add(SXAttributeData data) {
+        super.add(data);
+        return this;
+    }
+
+    public AttributeData take(AttributeData data) {
+        if (AttributeHook.getSXAttributeVersion().contains("2.0.2")) {
+            return this;
+        }
+        super.take(data);
         return this;
     }
 

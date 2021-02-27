@@ -24,6 +24,7 @@ public class AttributeHook extends JavaPlugin {
         api.init();
     }
 
+
     public static String getSXAttributeVersion() {
         return version;
     }
@@ -151,7 +152,7 @@ public class AttributeHook extends JavaPlugin {
             }
         }
 
-        public static void setProjectileData(UUID uuid, SXAttributeData data) {
+        public static void setProjectileData(UUID uuid, AttributeData data) {
             try {
                 setProjectileData.invoke(getApi.invoke(null), uuid, data);
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -167,7 +168,7 @@ public class AttributeHook extends JavaPlugin {
             }
         }
 
-        public static void setEntityAPIData(JavaPlugin plugin, UUID uuid, SXAttributeData data) {
+        public static void setEntityAPIData(JavaPlugin plugin, UUID uuid, AttributeData data) {
             try {
                 setEntityAPIData.invoke(getApi.invoke(null), plugin.getClass(), uuid, data);
             } catch (IllegalAccessException | InvocationTargetException e) {
