@@ -24,7 +24,6 @@ public class AttributeHook extends JavaPlugin {
         api.init();
     }
 
-
     public static String getSXAttributeVersion() {
         return version;
     }
