@@ -1,17 +1,23 @@
 package gitee.xzcxrj.attributehook;
 
+import github.saukiya.sxattribute.data.attribute.AttributeMap;
 import github.saukiya.sxattribute.data.attribute.SXAttributeData;
+import github.saukiya.sxattribute.data.attribute.SubAttribute;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-public class AttributeHook extends JavaPlugin {
+public class AttributeHook extends JavaPlugin implements Listener {
 
     private static String version;
 
@@ -19,9 +25,20 @@ public class AttributeHook extends JavaPlugin {
     public void onEnable() {
         version = BukkitLoader.getVersion("SX-Attribute");
         api.init();
+        Bukkit.getPluginManager().registerEvents(this, this);
+        Bukkit.getConsoleSender().sendMessage("§c"+ api.attributes.size());
     }
 
-    public static String getVersion() {
+    @EventHandler
+    void on(PlayerJoinEvent event) {
+        AttributeData data = api.loadListData(Collections.singletonList("生命上限: 20"));
+        data.add(api.loadListData(Collections.singletonList("生命上限: 20")));
+        api.setEntityAPIData(this, event.getPlayer().getUniqueId(), data);
+        AttributeData entityData = api.getEntityData(event.getPlayer());
+        event.getPlayer().sendMessage("生命上限: " + Arrays.toString(entityData.getAttributeValues("Health")));
+    }
+
+    public static String getSXAttributeVersion() {
         return version;
     }
 
@@ -44,12 +61,17 @@ public class AttributeHook extends JavaPlugin {
         private static Method getEntityName;
         private static Method getItemLevel;
 
+        private static final Map<String, SubAttribute> attributes = new HashMap<>();
+
+        @SuppressWarnings("unchecked")
         private static void init() {
             try {
                 Class<?> plugin = Class.forName("github.saukiya.sxattribute.SXAttribute");
                 getApi = plugin.getMethod("getApi");
                 Class<?> apiClass;
                 Class<?> conditionTypeClass;
+                Class<?> attributeClass = Class.forName("github.saukiya.sxattribute.data.attribute.SubAttribute");
+
                 if (version.contains("2.0.2")) {
                     apiClass = Class.forName("github.saukiya.sxattribute.api.SXAttributeAPI");
                     conditionTypeClass = Class.forName("github.saukiya.sxattribute.data.condition.SXConditionType");
@@ -59,6 +81,12 @@ public class AttributeHook extends JavaPlugin {
                     updateData = apiClass.getMethod("updateSlotData", Player.class);
                     getEntityData = apiClass.getMethod("getEntityAllData", LivingEntity.class, SXAttributeData[].class);
                     hasEntityAPIData = apiClass.getMethod("isEntityAPIData", Class.class, UUID.class);
+                    Field attributeMap = attributeClass.getDeclaredField("attributeMap");
+                    attributeMap.setAccessible(true);
+                    AttributeMap map = (AttributeMap) attributeMap.get(null);
+                    for (Map.Entry<Integer, SubAttribute> entry : map.entrySet()) {
+                        attributes.put(entry.getValue().getName().toUpperCase(), entry.getValue());
+                    }
                 }else {
                     apiClass = Class.forName("github.saukiya.sxattribute.api.SXAPI");
                     loadListData = apiClass.getMethod("loadListData", List.class);
@@ -67,6 +95,12 @@ public class AttributeHook extends JavaPlugin {
                     updateData = apiClass.getMethod("updateData", LivingEntity.class);
                     getEntityData = apiClass.getMethod("getEntityData", LivingEntity.class);
                     hasEntityAPIData = apiClass.getMethod("hasEntityAPIData", Class.class, UUID.class);
+                    Field attributeMap = attributeClass.getDeclaredField("attributes");
+                    attributeMap.setAccessible(true);
+                    List<SubAttribute> list = (List<SubAttribute>) attributeMap.get(null);
+                    for (SubAttribute attribute : list) {
+                        attributes.put(attribute.getName().toUpperCase(), attribute);
+                    }
                 }
                 setEntityAPIData = apiClass.getMethod("setEntityAPIData", Class.class, UUID.class, SXAttributeData.class);
                 setProjectileData = apiClass.getMethod("setProjectileData", UUID.class, SXAttributeData.class);
@@ -77,9 +111,17 @@ public class AttributeHook extends JavaPlugin {
                 removeEntityAllPluginData = apiClass.getMethod("removeEntityAllPluginData", UUID.class);
                 getEntityName = apiClass.getMethod("getEntityName", LivingEntity.class);
                 getItemLevel = apiClass.getMethod("getItemLevel", ItemStack.class);
-            } catch (ClassNotFoundException | NoSuchMethodException e) {
+            } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException | IllegalAccessException e) {
                 e.printStackTrace();
             }
+        }
+
+        public static SubAttribute getSubAttribute(String name) {
+            return attributes.get(name.toUpperCase());
+        }
+
+        public static Collection<SubAttribute> getAttributes() {
+            return attributes.values();
         }
 
         public static int getItemLevel(ItemStack itemStack) {
@@ -184,7 +226,8 @@ public class AttributeHook extends JavaPlugin {
             AttributeData data = new AttributeData();
             try {
                 if (version.contains("2.0.2")) {
-                    data.add((SXAttributeData) getEntityData.invoke(getApi.invoke(null), livingEntity, new SXAttributeData(){}));
+                    SXAttributeData[] array = new SXAttributeData[]{new SXAttributeData()};
+                    data.add((SXAttributeData) getEntityData.invoke(getApi.invoke(null), livingEntity, array));
                 }else {
                     data.add((SXAttributeData) getEntityData.invoke(getApi.invoke(null), livingEntity));
                 }
