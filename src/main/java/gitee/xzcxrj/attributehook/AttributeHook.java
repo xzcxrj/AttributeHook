@@ -17,7 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-public class AttributeHook extends JavaPlugin implements Listener {
+public class AttributeHook extends JavaPlugin {
 
     private static String version;
 
@@ -25,18 +25,8 @@ public class AttributeHook extends JavaPlugin implements Listener {
     public void onEnable() {
         version = BukkitLoader.getVersion("SX-Attribute");
         api.init();
-        Bukkit.getPluginManager().registerEvents(this, this);
-        Bukkit.getConsoleSender().sendMessage("§c"+ api.attributes.size());
     }
 
-    @EventHandler
-    void on(PlayerJoinEvent event) {
-        AttributeData data = api.loadListData(Collections.singletonList("生命上限: 20"));
-        data.add(api.loadListData(Collections.singletonList("生命上限: 20")));
-        api.setEntityAPIData(this, event.getPlayer().getUniqueId(), data);
-        AttributeData entityData = api.getEntityData(event.getPlayer());
-        event.getPlayer().sendMessage("生命上限: " + Arrays.toString(entityData.getAttributeValues("Health")));
-    }
 
     public static String getSXAttributeVersion() {
         return version;
