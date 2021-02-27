@@ -1,0 +1,6 @@
+name: AttributeHook
+main: gitee.xzcxrj.attributehook.AttributeHook
+version: 1.0.3-bate
+author: DogLong
+softdepend:
+  - SX-Attribute
